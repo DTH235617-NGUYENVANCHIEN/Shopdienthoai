@@ -133,6 +133,62 @@
     </div>
 </nav>
 
+<!-- tìm kiếm nhanh trên navbar -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    let timeout = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const tukhoa = this.value.trim();
+
+        if (tukhoa.length === 0) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch('/api/timkiem-nhanh?tukhoa=' + encodeURIComponent(tukhoa))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        let html = '';
+                        data.forEach(sp => {
+                            let imgSrc = sp.HinhAnh ? sp.HinhAnh.replace('/img/', '/images/') : '';
+                            html += `
+                                <a href="/dienthoai/chitiet/${sp._id}" class="dropdown-item d-flex align-items-center py-2 border-bottom text-wrap" style="white-space: normal;">
+                                    <img src="${imgSrc}" style="width: 45px; height: 45px; object-fit: contain; margin-right: 12px; border-radius: 5px;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;">${sp.TenSP}</div>
+                                        <div class="text-danger fw-bold" style="font-size: 0.9rem;">${sp.DonGia.toLocaleString('vi-VN')}đ</div>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        html += `<a href="/timkiem?tukhoa=${encodeURIComponent(tukhoa)}" class="dropdown-item text-center text-primary fw-bold py-2 bg-light">Xem tất cả kết quả <i class="bi bi-arrow-right"></i></a>`;
+                        
+                        searchResults.innerHTML = html;
+                        searchResults.style.display = 'block';
+                    } else {
+                        searchResults.innerHTML = '<div class="p-3 text-center text-muted"><i class="bi bi-emoji-frown fs-4 d-block mb-2"></i>Không tìm thấy điện thoại này</div>';
+                        searchResults.style.display = 'block';
+                    }
+                })
+                .catch(err => console.error("Lỗi tìm kiếm:", err));
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+});
+</script>
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');

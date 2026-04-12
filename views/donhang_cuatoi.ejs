@@ -33,8 +33,29 @@
                                     <% } else if(dh.TrangThai == 1) { %><span class="badge bg-info text-white rounded-pill">Đang giao</span>
                                     <% } else if(dh.TrangThai == 2) { %><span class="badge bg-success text-white rounded-pill">Đã nhận hàng</span>
                                     <% } else { %><span class="badge bg-secondary text-white rounded-pill">Đã hủy</span><% } %>
-                                    <div class="mt-2">
+                                   <div class="mt-2 d-flex justify-content-end gap-2">
                                         <a href="/donhang/chitiet/<%= dh._id %>" class="btn btn-sm btn-outline-primary rounded-pill px-3">Chi tiết</a>
+
+                                        <% 
+                                            let gioHienTai = new Date();
+                                            let gioDatHang = new Date(dh.NgayLap); // Phải đảm bảo DB ông có cột NgayLap nhé
+                                            let phutTroiQua = Math.floor((gioHienTai - gioDatHang) / (1000 * 60));
+                                        %>
+
+                                        <% if(dh.TrangThai == 0) { %> <% if(phutTroiQua <= 30) { %>
+                                                <a href="/donhang/huy/<%= dh._id %>" 
+                                                class="btn btn-sm btn-danger rounded-pill px-3" 
+                                                onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+                                                Hủy đơn
+                                                </a>
+                                            <% } else { %>
+                                                <button class="btn btn-sm btn-secondary rounded-pill px-3 disabled" 
+                                                        style="opacity: 0.6; cursor: not-allowed;"
+                                                        title="Đã quá thời gian cho phép hủy">
+                                                    Hủy đơn
+                                                </button>
+                                            <% } %>
+                                        <% } %>
                                     </div>
                                 </div>
                             </div>

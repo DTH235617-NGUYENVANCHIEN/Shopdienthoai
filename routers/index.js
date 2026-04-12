@@ -97,25 +97,32 @@ router.get('/admin/donhang', async (req, res) => {
 // GET: Smartphone news (Top 10 sản phẩm mới nhất)
 router.get('/hot', async (req, res) => {
     try {
-        // 1. Vẫn phải lấy danh sách thương hiệu để cái menu Navbar không bị lỗi
+        // 1. Lấy danh sách thương hiệu (giữ nguyên cho Navbar)
         var dsThuongHieu = await ThuongHieu.find().exec();
 
-        // 2. Lấy 10 cái điện thoại mới nhất (sort id -1 và limit 10)
-        var dtHot = await DienThoai.find({ TrangThai: 1 })
-            .sort({ _id: -1 })
-            .limit(10)
-            .populate('ThuongHieu')
-            .exec();
+        // 2. Lấy 10 máy mới nhất
+        // Tui thêm điều kiện SoLuong > 0 để chắc chắn hàng mới phải CÒN HÀNG mới cho lên top
+        var dtHot = await DienThoai.find({ 
+            TrangThai: 1, 
+            SoLuong: { $gt: 0 } // Thêm cái này nếu ông muốn máy mới phải còn hàng
+        })
+        .sort({ _id: -1 }) // _id: -1 là lấy thằng vừa mới tạo xong nhét lên đầu
+        .limit(10)
+        .populate('ThuongHieu')
+        .exec();
 
-        // 3. Đổ dữ liệu ra trang tìm kiếm 
+        // DEBUG: Ông mở màn hình đen (Terminal) xem nó có ra cái máy mới ông vừa tạo không
+        console.log("🔥 DANH SÁCH HOT:", dtHot.length, "máy");
+
+        // 3. Đổ dữ liệu ra trang tìm kiếm
         res.render('timkiem', {
-            title: 'Smartphone Hot Nhất',
+            title: 'Smartphone Mới Nhất',
             dienthoai: dtHot,
-            tukhoa: '🔥 Top 10 Smartphone Mới Nhất', // Dùng icon lửa cho máu
+            tukhoa: '🔥 Top 10 Smartphone Vừa Về Hàng', 
             thuonghieu: dsThuongHieu 
         });
     } catch (error) {
-        console.log(error);
+        console.log("❌ LỖI ROUTE HOT:", error);
         res.redirect('/error');
     }
 });

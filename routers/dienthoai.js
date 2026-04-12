@@ -38,8 +38,12 @@ const kiemTraAdmin = (req, res, next) => {
 // GET: /dienthoai/list - Danh sách sản phẩm cho khách
 router.get('/list', async (req, res) => {
     try {
-        // Chỉ lấy máy đang bán (TrangThai = 1)
-        var ds = await DienThoai.find({ TrangThai: 1 }).populate('ThuongHieu');
+        // Lọc 2 điều kiện: Đang cho phép bán (TrangThai = 1) VÀ còn hàng (SoLuong > 0)
+        var ds = await DienThoai.find({ 
+            TrangThai: 1, 
+            SoLuong: { $gt: 0 } 
+        }).populate('ThuongHieu');
+
         res.render('dienthoai_list', { 
             title: 'Cửa hàng Điện Thoại', 
             dienthoai: ds 
@@ -52,10 +56,17 @@ router.get('/list', async (req, res) => {
 // GET: /dienthoai/chitiet/:id - Xem chi tiết
 router.get('/chitiet/:id', async (req, res) => {
     try {
-        var dt = await DienThoai.findById(req.params.id).populate('ThuongHieu');
+        // 1. Phải lấy thêm danh sách thương hiệu để cái Navbar không bị trống
+        var dsThuongHieu = await ThuongHieu.find().exec();
+
+        // 2. Phải có .populate('ThuongHieu') thì mới lấy được chữ "Apple"
+        var dt = await DienThoai.findById(req.params.id).populate('ThuongHieu').exec();
+       
         res.render('dienthoai_chitiet', { 
             title: dt.TenSP, 
-            dt: dt 
+            dt: dt,
+            thuonghieu: dsThuongHieu
+            
         });
     } catch (error) {
         res.redirect('/dienthoai/list');

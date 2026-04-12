@@ -1,105 +1,98 @@
-const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
-
 // =======================================================
-// 1. ĐIỀN THÔNG TIN TỪ GOOGLE CLOUD CỦA ÔNG VÀO ĐÂY
+// 1. THÔNG TIN CHÌA KHÓA GOOGLE CLOUD
 // =======================================================
 const CLIENT_ID = '532299171106-fihkkls0mek65566vp6igvu7kmsbobvp.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
 const REFRESH_TOKEN = '1//04y1E_7pqDpJtCgYIARAAGAQSNwF-L9Ir7XFoq5_1qq9MBxBkicHzeUUCrVgnfQ0s2ddg9JCf85DxLyCpwVTVFw5bL7R0IK-GEoA';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const MY_EMAIL = 'gamechienchoi@gmail.com'; // Email ông dùng nãy giờ
+const MY_EMAIL = 'gamechienchoi@gmail.com';
 
-// Thiết lập OAuth2
-const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
+const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+
 // =======================================================
-// 2. HÀM GỬI EMAIL CHÀO MỪNG
+// 2. HÀM MÃ HÓA EMAIL (Bắt buộc của Gmail API)
+// =======================================================
+// =======================================================
+// 2. HÀM MÃ HÓA EMAIL (Đã fix lỗi font chữ người gửi)
+// =======================================================
+const createEncodedMail = (to, subject, htmlContent) => {
+    // Đóng gói tên Shop theo đúng chuẩn chống lỗi font của Gmail
+    const tenShop = "Shop Điện Thoại Chiến 📱";
+    const tenShopDaMaHoa = `=?utf-8?B?${Buffer.from(tenShop).toString('base64')}?=`;
+
+    const str = [
+        `Content-Type: text/html; charset="UTF-8"\n`,
+        `MIME-Version: 1.0\n`,
+        `To: ${to}\n`,
+        `From: ${tenShopDaMaHoa} <${MY_EMAIL}>\n`, // Đã ráp tên mã hóa vào đây
+        `Subject: =?utf-8?B?${Buffer.from(subject).toString('base64')}?=\n\n`,
+        `${htmlContent}`
+    ].join('');
+    
+    return Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+// =======================================================
+// 3. HÀM GỬI EMAIL CHÀO MỪNG (Khi đăng ký tài khoản)
 // =======================================================
 const guiEmailChaoMung = async (emailKhachHang, hoTenKhachHang) => {
     try {
-        // Lấy mã Access Token mới (Tự động)
-        const accessToken = await oAuth2Client.getAccessToken();
+        const subject = '   🎉 Chào mừng bạn gia nhập ShopDienThoai!';
+        const html = `
+            <div style="font-family: Arial, sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
+                <h2 style="color: #0d6efd;">Chào ${hoTenKhachHang},</h2>
+                <p>Tài khoản của bạn đã được đăng ký thành công!</p>
+                <p>Cảm ơn bạn đã tin tưởng. Từ nay bạn có thể thoải mái mua sắm các sản phẩm công nghệ mới nhất tại cửa hàng của chúng tôi.</p>
+                <br>
+                <p>Trân trọng,</p>
+                <b>Đội ngũ ShopDienThoai</b>
+            </div>
+        `;
+        
+        const raw = createEncodedMail(emailKhachHang, subject, html);
 
-        // Cấu hình người gửi
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: MY_EMAIL,
-                clientId: CLIENT_ID,
-                clientSecret: CLIENT_SECRET,
-                refreshToken: REFRESH_TOKEN,
-                accessToken: accessToken.token
-            }
+        await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: { raw: raw }
         });
 
-        // Thiết kế nội dung Email
-        const mailOptions = {
-            from: `"Shop Điện Thoại Chiến 📱" <${MY_EMAIL}>`,
-            to: emailKhachHang,
-            subject: '🎉 Chào mừng bạn gia nhập ShopDienThoai!',
-            html: `
-                <div style="font-family: Arial, sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
-                    <h2 style="color: #0d6efd;">Chào ${hoTenKhachHang},</h2>
-                    <p>Tài khoản của bạn đã được đăng ký thành công!</p>
-                    <p>Cảm ơn bạn đã tin tưởng. Từ nay bạn có thể thoải mái mua sắm các sản phẩm công nghệ mới nhất tại cửa hàng của chúng tôi.</p>
-                    <br>
-                    <p>Trân trọng,</p>
-                    <b>Đội ngũ ShopDienThoai</b>
-                </div>
-            `
-        };
-
-        // Bóp cò gửi đi
-        const result = await transporter.sendMail(mailOptions);
-        console.log('✅ ĐÃ GỬI EMAIL THÀNH CÔNG TỚI:', emailKhachHang);
-        return result;
-
+        console.log('✅ [GMAIL API] ĐÃ GỬI MAIL CHÀO MỪNG TỚI:', emailKhachHang);
     } catch (error) {
-        console.log('❌ LỖI GỬI EMAIL:', error);
+        console.log('❌ LỖI GỬI EMAIL CHÀO MỪNG:', error);
     }
 };
 
-// 3. HÀM GỬI EMAIL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG
+// =======================================================
+// 4. HÀM GỬI EMAIL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG
+// =======================================================
 const guiEmailDatHang = async (emailKhachHang, hoTenKhachHang, maDonHang, tongTien) => {
     try {
-        const accessToken = await oAuth2Client.getAccessToken();
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: MY_EMAIL,
-                clientId: CLIENT_ID,
-                clientSecret: CLIENT_SECRET,
-                refreshToken: REFRESH_TOKEN,
-                accessToken: accessToken.token
-            }
+        const subject = `📦 Đặt hàng thành công - Mã đơn: #${maDonHang}`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; border: 1px solid #28a745; padding: 20px; border-radius: 10px;">
+                <h2 style="color: #28a745;">Cảm ơn ${hoTenKhachHang} đã đặt hàng!</h2>
+                <p>Đơn hàng <b>#${maDonHang}</b> của bạn đã được hệ thống ghi nhận.</p>
+                <p>Tổng thanh toán: <b style="color: red; font-size: 18px;">${tongTien.toLocaleString('vi-VN')}đ</b></p>
+                <p>Chúng tôi sẽ sớm liên hệ với bạn để xác nhận giao hàng.</p>
+                <hr>
+                <p>Cần hỗ trợ? Vui lòng gọi Hotline: 1900 xxxx</p>
+            </div>
+        `;
+        
+        const raw = createEncodedMail(emailKhachHang, subject, html);
+
+        await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: { raw: raw }
         });
 
-        const mailOptions = {
-            from: `"Shop Điện Thoại Chiến 📱" <${MY_EMAIL}>`,
-            to: emailKhachHang,
-            subject: `📦 Đặt hàng thành công - Mã đơn: #${maDonHang}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; border: 1px solid #28a745; padding: 20px; border-radius: 10px;">
-                    <h2 style="color: #28a745;">Cảm ơn ${hoTenKhachHang} đã đặt hàng!</h2>
-                    <p>Đơn hàng <b>#${maDonHang}</b> của bạn đã được hệ thống ghi nhận.</p>
-                    <p>Tổng thanh toán: <b style="color: red; font-size: 18px;">${tongTien.toLocaleString('vi-VN')}đ</b></p>
-                    <p>Chúng tôi sẽ sớm liên hệ với bạn để xác nhận giao hàng.</p>
-                    <hr>
-                    <p>Cần hỗ trợ? Vui lòng gọi Hotline: 1900 xxxx</p>
-                </div>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log('✅ Đã gửi mail BÁO ĐƠN HÀNG cho:', emailKhachHang);
+        console.log('✅ [GMAIL API] ĐÃ GỬI MAIL BÁO ĐƠN HÀNG CHO:', emailKhachHang);
     } catch (error) {
         console.log('❌ LỖI GỬI MAIL ĐƠN HÀNG:', error);
     }
 };
 
-// Xuất cả 2 hàm ra để xài
+// Xuất cả 2 hàm ra để xài ở các Router khác
 module.exports = { guiEmailChaoMung, guiEmailDatHang };

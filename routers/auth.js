@@ -4,12 +4,12 @@ var bcrypt = require('bcryptjs');
 var TaiKhoan = require('../models/taikhoan');
 var multer = require('multer'); 
 var fs = require('fs');
-const guiEmailChaoMung = require('../utils/mailer');
+const {guiEmailChaoMung} = require('../utils/mailer');
 
 // CẤU HÌNH NƠI LƯU ẢNH
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        var dir = './public/images/';
+        var dir = './public/images/users';
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
@@ -45,7 +45,7 @@ router.post('/dangky', upload.single('HinhAnh'), async (req, res) => {
             return res.redirect('/dangky');
         }
         var salt = bcrypt.genSaltSync(10);
-        let duongDanAnh = req.file ? '/images/' + req.file.filename : '';
+        let duongDanAnh = req.file ? '/images/users/' + req.file.filename : '';
 
         var data = {
             HoVaTen: req.body.HoVaTen,
@@ -121,7 +121,7 @@ router.post('/caidat/capnhat', kiemTraDangNhap, upload.single('HinhAnh'), async 
 
         // Nếu người dùng có chọn ảnh mới thì cập nhật link ảnh mới
         if (req.file) {
-            dataUpdate.HinhAnh = '/images/' + req.file.filename;
+            dataUpdate.HinhAnh = '/images/users/' + req.file.filename;
         }
 
         await TaiKhoan.findByIdAndUpdate(req.session.MaNguoiDung, dataUpdate);

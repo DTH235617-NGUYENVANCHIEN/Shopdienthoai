@@ -68,8 +68,12 @@
                                 </td>
                                 <td><span class="badge bg-secondary opacity-75"><%= dt.ThuongHieu ? dt.ThuongHieu.TenThuongHieu : 'N/A' %></span></td>
                                 <td class="text-primary fw-bold"><%= dt.DonGia.toLocaleString('vi-VN') %>đ</td>
-                                <td class="fw-bold"><%= dt.SoLuong %></td>
-                                
+                                <td>
+                                    <strong><%= dt.SoLuong %></strong>
+                                        <% if(dt.SoLuong < 5) { %>
+                                            <br><span class="badge bg-warning text-dark">⚠️ Cần nhập thêm!</span>
+                                        <% } %>
+                                </td>
                                 <td>
                                     <% if(dt.TrangThai == 1) { %>
                                         <a href="/dienthoai/doitrangthai/<%= dt._id %>" class="badge-status bg-success-subtle text-success border border-success">

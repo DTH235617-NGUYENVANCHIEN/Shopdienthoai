@@ -172,19 +172,30 @@ router.get('/', kiemTraAdmin, async (req, res) => {
 });
 
 // GET: Duyệt đơn hàng / Cập nhật trạng thái (Giống 'baiviet/duyet/:id' của thầy)
+// GET: Duyệt đơn hàng
 router.get('/duyet/:id', kiemTraAdmin, async (req, res) => {
     var id = req.params.id;
     var dh = await DonHang.findById(id);
     
-    // Logic cập nhật trạng thái: 0 (Chờ duyệt) -> 1 (Đang giao) -> 2 (Đã giao thành công)
-    var trangThaiMoi = dh.TrangThai;
-    if (dh.TrangThai == 0) trangThaiMoi = 1;
-    else if (dh.TrangThai == 1) trangThaiMoi = 2;
-    
+    // CHỈ TRỪ KHO KHI CHUYỂN TỪ "CHỜ XÁC NHẬN (0)" SANG "ĐANG GIAO (1)"
+    if (dh.TrangThai == 0) {
+        // 1. Tìm tất cả các món trong đơn hàng này
+        var chiTiet = await ChiTietDonHang.find({ DonHang: id });
+
+        // 2. Chạy vòng lặp để trừ số lượng từng món
+        for (let item of chiTiet) {
+            await DienThoai.findByIdAndUpdate(item.DienThoai, {
+                $inc: { SoLuong: -item.SoLuong } // Lệnh $inc với số âm giúp trừ kho cực nhanh
+            });
+        }
+    }
+
+    // Sau đó mới cập nhật trạng thái đơn hàng như cũ
+    var trangThaiMoi = (dh.TrangThai == 0) ? 1 : 2;
     await DonHang.findByIdAndUpdate(id, { 'TrangThai': trangThaiMoi });
     
-    req.session.success = 'Đã cập nhật trạng thái đơn hàng!';
-    res.redirect(req.get('Referrer') || '/donhang'); // Trở lại trang trước (Giống hệt thầy)
+    req.session.success = 'Đã duyệt đơn và cập nhật số lượng kho!';
+    res.redirect(req.get('Referrer') || '/donhang');
 });
 
 // GET: Xóa / Hủy đơn hàng (Giống 'baiviet/xoa/:id' của thầy)
@@ -202,16 +213,34 @@ router.get('/xoa/:id', async (req, res) => {
 });
 
 // GET: Tăng số lượng sản phẩm thêm 1
-router.get('/tang/:id', (req, res) => {
-    var idSP = req.params.id;
-    var giohang = req.session.giohang || [];
-    var viTri = giohang.findIndex(item => item.idSP == idSP);
+router.get('/tang/:id', async (req, res) => { // Thêm chữ async ở đây
+    try {
+        var idSP = req.params.id;
+        var giohang = req.session.giohang || [];
+        var viTri = giohang.findIndex(item => item.idSP == idSP);
 
-    if (viTri >= 0) {
-        giohang[viTri].SoLuong += 1;
-        giohang[viTri].ThanhTien = giohang[viTri].SoLuong * giohang[viTri].DonGia;
+        if (viTri >= 0) {
+            // 1. Tìm máy này trong Database để check kho thực tế
+            var spTrongKho = await DienThoai.findById(idSP);
+
+            // 2. Kiểm tra: Nếu tăng thêm 1 mà vượt quá số lượng trong kho
+            if (giohang[viTri].SoLuong + 1 > spTrongKho.SoLuong) {
+                // Báo lỗi cho khách biết (Dùng cái req.session.error mà ông hay xài á)
+                req.session.error = `Xin lỗi, cửa hàng hiện chỉ còn ${spTrongKho.SoLuong} máy này!`;
+                return res.redirect('/donhang/giohang');
+            }
+
+            // 3. Nếu còn đủ hàng thì mới cho tăng
+            giohang[viTri].SoLuong += 1;
+            giohang[viTri].ThanhTien = giohang[viTri].SoLuong * giohang[viTri].DonGia;
+            
+            req.session.success = 'Đã cập nhật số lượng!';
+        }
+        res.redirect('/donhang/giohang');
+    } catch (error) {
+        console.log(error);
+        res.redirect('/donhang/giohang');
     }
-    res.redirect('/donhang/giohang');
 });
 
 // GET: Giảm số lượng sản phẩm đi 1
@@ -331,6 +360,30 @@ router.post('/xacnhan', kiemTraDangNhap, async (req, res) => {
         console.log(error);
         req.session.error = 'Có lỗi xảy ra khi đặt hàng!';
         res.redirect('/donhang/thanhtoan');
+    }
+});
+// GET: Khách hàng tự hủy đơn
+router.get('/huy/:id', kiemTraDangNhap, async (req, res) => {
+    try {
+        var id = req.params.id;
+        var dh = await DonHang.findById(id);
+
+        // Kiểm tra bảo mật lần 2 dưới Backend (Chống hacker dùng Postman chọc vào)
+        let soPhutDaQua = Math.floor((new Date() - new Date(dh.NgayLap)) / (1000 * 60));
+        
+        // Khách chỉ được hủy đơn CỦA MÌNH, đang Chờ duyệt, và dưới 30 phút
+        if (dh.KhachHang == req.session.MaNguoiDung && dh.TrangThai == 0 && soPhutDaQua <= 30) {
+            // Đổi trạng thái thành -1 (Đã hủy)
+            await DonHang.findByIdAndUpdate(id, { TrangThai: -1 });
+            req.session.success = 'Đã hủy đơn hàng thành công!';
+        } else {
+            req.session.error = 'Không thể hủy đơn hàng này!';
+        }
+        
+        res.redirect('/donhang/cuatoi');
+    } catch (error) {
+        console.log(error);
+        res.redirect('/error');
     }
 });
 module.exports = router;
