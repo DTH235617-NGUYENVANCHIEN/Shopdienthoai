@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <title><%= title %></title>
+    <style>
+        /* Background màu nhạt sang trọng */
+        body { 
+            background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        /* Hiệu ứng nổi cho thẻ Form */
+        .login-card { 
+            border: none; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06); 
+            background: rgba(255, 255, 255, 0.95);
+        }
+        /* Style cho ô nhập liệu */
+        .form-control { 
+            border-radius: 12px; 
+            border: 1.5px solid #e2e8f0; 
+            background-color: #f8fafc;
+            padding: 12px;
+        }
+        .form-control:focus { 
+            box-shadow: none; 
+            border-color: #0d6efd; 
+            background-color: #ffffff;
+        }
+        /* Xử lý icon nhập liệu nằm chung một khối */
+        .input-group-text {
+            border: 1.5px solid #e2e8f0;
+            background-color: #f8fafc;
+            transition: border-color 0.15s ease-in-out;
+        }
+        .form-control:focus + .input-group-text, 
+        .input-group:focus-within .input-group-text {
+            border-color: #0d6efd;
+            background-color: #ffffff;
+        }
+        .toggle-password { cursor: pointer; }
+        
+        /* Hiệu ứng nút bấm */
+        .btn-login { 
+            border-radius: 12px; 
+            padding: 14px; 
+            font-weight: 600; 
+            letter-spacing: 0.5px; 
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.25);
+        }
+        /* Logo nổi bật */
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e0ebff 0%, #cde0ff 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <%- include('navbar') %>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <% if (message) { %>
+                <div class="alert alert-warning alert-dismissible fade show text-center mx-auto shadow-sm" style="max-width: 420px; border-radius: 12px;" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> <%- message %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4 col-sm-8">
+                    <div class="card login-card p-sm-4 p-3 shadow-lg">
+                        <div class="text-center mb-4 mt-2">
+                            <div class="icon-wrapper mb-3 shadow-sm">
+                                <i class="bi bi-shop text-primary" style="font-size: 2.2rem;"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark">Đăng Nhập</h3>
+                            <p class="text-muted small">Chào mừng bạn trở lại với ShopDienThoai</p>
+                        </div>
+
+                        <form action="/dangnhap" method="post">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-bold small ms-1">Tên đăng nhập</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0" style="border-radius: 12px 0 0 12px;"><i class="bi bi-person text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" name="TenDangNhap" required placeholder="Nhập tài khoản của bạn" />
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center ms-1 mb-1">
+                                    <label class="form-label text-muted fw-bold small mb-0">Mật khẩu</label>
+                                    
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0" style="border-radius: 12px 0 0 12px;"><i class="bi bi-shield-lock text-muted"></i></span>
+                                    <input type="password" class="form-control border-start-0 border-end-0 ps-0" id="passwordInput" name="MatKhau" required placeholder="••••••••" />
+                                    <span class="input-group-text bg-white toggle-password" onclick="togglePassword()" style="border-radius: 0 12px 12px 0;" title="Hiện/Ẩn mật khẩu">
+                                        <i class="bi bi-eye-slash text-muted" id="toggleIcon"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-login w-100 mb-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>ĐĂNG NHẬP
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-3 pt-3 border-top">
+                            <span class="text-muted small">Khách hàng mới?</span> 
+                            <a href="/dangky" class="text-decoration-none fw-bold ms-1">Tạo tài khoản ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <%- include('javascript') %>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+                toggleIcon.classList.replace('text-muted', 'text-primary'); // Chuyển màu con mắt sang xanh
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+                toggleIcon.classList.replace('text-primary', 'text-muted'); // Chuyển màu con mắt về xám
+            }
+        }
+    </script>
+</body>
+</html>

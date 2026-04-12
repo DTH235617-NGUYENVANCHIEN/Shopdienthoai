@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <title><%= title %></title>
+</head>
+<body class="bg-light">
+    
+    <%- include('navbar') %>
+
+    <div class="container py-5">
+        <h2 class="fw-bold mb-4"><i class="bi bi-cart3 text-warning me-2"></i>Giỏ hàng của bạn</h2>
+
+        <% if (giohang.length === 0) { %>
+            <div class="alert alert-info text-center py-5 shadow-sm border-0 rounded-4">
+                <i class="bi bi-cart-x display-1 text-secondary mb-3"></i>
+                <h4>Giỏ hàng đang trống</h4>
+                <p>Hãy tìm và chọn cho mình những chiếc điện thoại ưng ý nhé!</p>
+                <a href="/" class="btn btn-primary rounded-pill px-4 mt-2">Tiếp tục mua sắm</a>
+            </div>
+        <% } else { %>
+            <form action="/donhang/xac-nhan" method="POST">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th style="width: 50px;">
+                                        <input class="form-check-input fs-5" type="checkbox" id="checkAll" >
+                                    </th>
+                                    <th>Hình ảnh</th>
+                                    <th class="text-start">Tên sản phẩm</th>
+                                    <th>Đơn giá</th>
+                                    <th style="width: 150px;">Số lượng</th>
+                                    <th>Thành tiền</th>
+                                    <th>Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <% giohang.forEach(item => { %>
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input chk-sanpham" value="<%= item.idSP %>">
+                                        </td>
+                                        <td>
+                                            <a href="/dienthoai/chitiet/<%= item.idSP %>">
+                                                <img src="<%= item.HinhAnh %>" alt="<%= item.TenSP %>" style="width: 60px; height: 60px; object-fit: contain;">
+                                            </a>
+                                        </td>
+
+                                        <td class="text-start fw-semibold">
+                                            <a href="/dienthoai/chitiet/<%= item.idSP %>" class="text-dark text-decoration-none action-hover">
+                                                <%= item.TenSP %>
+                                            </a>
+                                        </td>
+                                        <td class="text-danger fw-bold"><%= item.DonGia.toLocaleString('vi-VN') %>đ</td>
+                                        
+                                        <td>
+                                            <div class="input-group input-group-sm mx-auto" style="max-width: 120px;">
+                                                <a href="<%= item.SoLuong > 1 ? '/donhang/giam/' + item.idSP : 'javascript:void(0)' %>" 
+                                                   class="btn btn-outline-secondary fw-bold px-3 <%= item.SoLuong > 1 ? '' : 'disabled opacity-50' %>"
+                                                   <%= (item.SoLuong) <= 1 ?    'style="pointer-events: none;"' : '' %>>-</a>
+                                                
+                                                <input type="text" class="form-control text-center bg-white fw-bold" value="<%= item.SoLuong %>" readonly>
+                                                
+                                                <a href="/donhang/tang/<%= item.idSP %>" class="btn btn-outline-secondary fw-bold px-3">+</a>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-danger fw-bold item-total" data-value="<%= item.ThanhTien %>">
+                                            <%= item.ThanhTien.toLocaleString('vi-VN') %>đ
+                                        </td>
+                                        <td>
+                                            <a href="/donhang/xoa-mon/<%= item.idSP %>" class="btn btn-sm btn-outline-danger rounded-circle"><i class="bi bi-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row justify-content-end">
+                    <div class="col-md-5 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="fs-5 fw-semibold">Tổng cộng:</span>
+                                    <span class="fs-4 fw-bold text-danger" id="totalDisplay">
+                                        <%= tongTien.toLocaleString('vi-VN') %>đ
+                                    </span>
+                                </div>
+                                <button type="button" class="btn btn-primary w-100" onclick="tienHanhThanhToan()">
+                                    Tiến hành thanh toán
+                                </button>
+                                <a href="/" class="btn btn-outline-secondary w-100 rounded-pill py-2 mt-2">
+                                    Mua thêm sản phẩm khác
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        <% } %>
+
+    </div>
+
+    <%- include('footer') %>
+    <%- include('javascript') %>
+    
+</body>
+</html>

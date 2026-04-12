@@ -1,0 +1,188 @@
+<style>
+    /* Chống rớt dòng và canh giữa icon */
+    .shop-navbar .nav-link { white-space: nowrap !important; display: flex; align-items: center; font-size: 0.95rem; }
+    .shop-navbar .nav-link i { margin-right: 6px; font-size: 1.15rem; }
+    /* Định dạng thanh tìm kiếm CỐ ĐỊNH KÍCH THƯỚC */
+    .search-container { width: 400px; /* Giới hạn chiều rộng để chừa chỗ cho mục Quản lý */ }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top py-2 shop-navbar">
+    <div class="container-fluid px-3 px-xl-5">
+        
+        <a class="navbar-brand fw-bold text-white me-4 d-flex align-items-center" href="/">
+            <i class="bi bi-phone-fill text-warning me-2" style="font-size: 1.5rem;"></i> ShopDienThoai
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 align-items-center">
+                
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-light" href="/hot">
+                        <i class="bi bi-fire text-danger"></i> Smartphone news
+                    </a>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle fw-semibold text-light" href="javascript:void(0)" data-bs-toggle="dropdown">
+                        <i class="bi bi-funnel-fill text-info"></i> Thương hiệu
+                    </a>
+                   <ul class="dropdown-menu shadow border-0 mt-2">
+                        <% if (typeof thuonghieu !== 'undefined' && thuonghieu.length > 0) { %>
+                            <% thuonghieu.forEach(th => { %>
+                                <li>
+                                    <a class="dropdown-item py-2" href="/thuonghieu/<%= th._id %>">
+                                        <%= th.TenThuongHieu %>
+                                    </a>
+                                </li>
+                            <% }); %>
+
+                        <% } %>
+
+                    </ul>
+                </li>
+
+                <% if (typeof session !== "undefined" && session.MaNguoiDung && session.QuyenHan == 1) { %>
+                    <li class="nav-item dropdown ms-lg-2">
+                        <a class="nav-link dropdown-toggle fw-bold text-danger border border-danger rounded-pill px-3 py-1" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-shield-lock-fill"></i> Quản lý
+                        </a>
+                        <ul class="dropdown-menu shadow-sm border-0 mt-2">
+                            <li><a class="dropdown-item" href="/thuonghieu"><i class="bi bi-tags text-danger me-2"></i>Thương hiệu</a></li>
+                            <li><a class="dropdown-item" href="/dienthoai"><i class="bi bi-phone text-primary me-2"></i>Sản phẩm</a></li>
+                            <li><a class="dropdown-item" href="/donhang"><i class="bi bi-box-seam text-success me-2"></i>Đơn hàng</a></li>
+                            <li><a class="dropdown-item" href="/taikhoan"><i class="bi bi-people text-warning me-2"></i>Tài khoản</a></li>
+                        </ul>
+                    </li>
+                <% } %>
+            </ul>
+
+            <form action="/timkiem" method="GET" class="d-flex mx-auto search-container my-3 my-lg-0 px-lg-2 position-relative" role="search" id="searchForm">
+                <input class="form-control rounded-pill px-4 border-0 bg-light" type="search" name="tukhoa" id="searchInput" placeholder="Bạn muốn tìm điện thoại nào?..." required autocomplete="off" />
+                <button class="btn btn-warning rounded-pill px-3 fw-bold ms-2 shadow-sm" type="submit">
+                    <i class="bi bi-search m-0 text-dark"></i>
+                </button>
+
+                <div id="searchResults" class="dropdown-menu shadow-lg border-0 w-100 mt-2 position-absolute" style="top: 100%; left: 0; display: none; z-index: 1050; border-radius: 15px; overflow: hidden; max-height: 400px; overflow-y: auto;">
+                    </div>
+            </form>
+
+            <ul class="navbar-nav mb-2 mb-lg-0 gap-2 align-items-center">
+                 <!-- phân quyền giỏ hàng và đơn hàng -->
+                <li class="nav-item me-2">
+                    <% if (session && session.QuyenHan == 1) { %>
+                        <a class="nav-link fw-bold text-info position-relative" href="/admin/donhang">
+                            <i class="bi bi-cart-check fs-5"></i> Đơn hàng
+                            <% if (typeof soDonHangChoDuyet !== 'undefined' && soDonHangChoDuyet > 0) { %>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    <%= soDonHangChoDuyet %>
+                                </span>
+                            <% } %>
+                        </a>
+
+                    <% } else { %>
+                        <a class="nav-link fw-bold text-warning position-relative" href="/donhang/giohang">
+                            <i class="bi bi-cart3 fs-5"></i> Giỏ hàng
+                            <span id="cart-count" class="badge bg-danger rounded-pill <%= (typeof soLuongGioHang === 'undefined' || soLuongGioHang == 0) ? 'd-none' : '' %>">
+                                <%= (typeof soLuongGioHang !== 'undefined') ? soLuongGioHang : 0 %>
+                            </span>
+                        </a>
+                    <% } %>
+                </li>
+
+                <% if (session && session.MaNguoiDung) { %>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-bold text-white" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <%= session.HoVaTen %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li><a class="dropdown-item py-2" href="/caidat"><i class="bi bi-person-vcard me-2"></i>Hồ sơ cá nhân</a></li>
+                            <li><a class="dropdown-item py-2" href="/caidat#v-pills-password"><i class="bi bi-shield-lock me-2"></i>Đổi mật khẩu</a></li>
+                            
+                            <% if(session.QuyenHan == 1) { %>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-primary fw-bold" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Quản lý hệ thống</a></li>
+                            <% } else { %>
+                                <li><a class="dropdown-item py-2" href="/donhang/cuatoi"><i class="bi bi-bag-check me-2"></i>Đơn hàng của tôi</a></li>
+                            <% } %>
+                        
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="/dangxuat"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                        </ul>
+                    </li>
+
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link text-white fw-bold" href="/dangky">
+                            <i class="bi bi-person-plus-fill"></i> Đăng ký
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white fw-bold" href="/dangnhap">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                        </a>
+                    </li>
+                <% } %>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    let timeout = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const tukhoa = this.value.trim();
+
+        if (tukhoa.length === 0) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch('/api/timkiem-nhanh?tukhoa=' + encodeURIComponent(tukhoa))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        let html = '';
+                        data.forEach(sp => {
+                            let imgSrc = sp.HinhAnh ? sp.HinhAnh.replace('/img/', '/images/') : '';
+                            html += `
+                                <a href="/dienthoai/chitiet/${sp._id}" class="dropdown-item d-flex align-items-center py-2 border-bottom text-wrap" style="white-space: normal;">
+                                    <img src="${imgSrc}" style="width: 45px; height: 45px; object-fit: contain; margin-right: 12px; border-radius: 5px;">
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;">${sp.TenSP}</div>
+                                        <div class="text-danger fw-bold" style="font-size: 0.9rem;">${sp.DonGia.toLocaleString('vi-VN')}đ</div>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        html += `<a href="/timkiem?tukhoa=${encodeURIComponent(tukhoa)}" class="dropdown-item text-center text-primary fw-bold py-2 bg-light">Xem tất cả kết quả <i class="bi bi-arrow-right"></i></a>`;
+                        
+                        searchResults.innerHTML = html;
+                        searchResults.style.display = 'block';
+                    } else {
+                        searchResults.innerHTML = '<div class="p-3 text-center text-muted"><i class="bi bi-emoji-frown fs-4 d-block mb-2"></i>Không tìm thấy điện thoại này</div>';
+                        searchResults.style.display = 'block';
+                    }
+                })
+                .catch(err => console.error("Lỗi tìm kiếm:", err));
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+});
+</script>

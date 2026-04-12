@@ -1,0 +1,142 @@
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+	(function() {
+		'use strict';
+		const forms = document.querySelectorAll('.needs-validation');
+		Array.from(forms).forEach(form => {
+			form.addEventListener('submit', event => {
+				if (!form.checkValidity()) {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+				form.classList.add('was-validated');
+			}, false);
+		});
+	})();
+</script>
+ 
+<!-- Hàm thêm vào giỏ hàng mà không load lại trang -->
+<script>
+// Hàm thêm vào giỏ hàng mà không load lại trang
+function themVaoGioHang(idSP) {
+    // Gửi yêu cầu "ngầm" tới server
+    fetch('/donhang/them-ajax/' + idSP)
+        .then(response => response.json()) 
+        .then(data => {
+            if (data.success) {
+                // 1. Cập nhật con số trên Navbar ngay lập tức
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                     cartCount.innerText = data.newTotal;
+                     // DÒNG QUAN TRỌNG: Xóa lớp tàng hình để hiện cục màu đỏ lên
+                     cartCount.classList.remove('d-none'); 
+                }
+                
+                // 2. Hiện một cái thông báo nhỏ xinh xắn góc phải (Toast)
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Đã thêm sản phẩm vào giỏ hàng!'
+                });
+                
+            } else {
+                // Báo lỗi nếu chưa đăng nhập
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ối, có lỗi!',
+                    text: data.message || 'Vui lòng đăng nhập để mua hàng.',
+                    confirmButtonText: 'Đã hiểu'
+                });
+            }
+        })
+        .catch(err => console.error('Lỗi rồi Chiến ơi:', err));
+}
+</script>
+
+<!-- Tính tổng tiền giỏ hàng -->
+<script>
+    // 1. HÀM TÍNH TOÁN LẠI TỔNG TIỀN MỖI KHI TICK CHỌN
+    function capNhatTongTien() {
+        let tongTienMoi = 0;
+        // Lấy tất cả các ô checkbox ĐANG ĐƯỢC TICK
+        let cacODaTick = document.querySelectorAll('.chk-sanpham:checked');
+        
+        cacODaTick.forEach(box => {
+            // Từ ô checkbox, dò ngược lên thẻ <tr> chứa nó, rồi tìm cái <td> chứa tiền
+            let hangTR = box.closest('tr');
+            let oTien = hangTR.querySelector('.item-total');
+            // Lấy cục tiền từ data-value ông đã làm sẵn (VD: 590000)
+            let tien = parseInt(oTien.getAttribute('data-value'));
+            tongTienMoi += tien;
+        });
+
+        // Đổ tiền mới ra màn hình, có fomat dấu phẩy đàng hoàng
+        document.getElementById('totalDisplay').innerText = tongTienMoi.toLocaleString('vi-VN') + 'đ';
+    }
+
+    // 2. LẮNG NGHE SỰ KIỆN KHI BẤM VÀO TỪNG Ô CHECKBOX NHỎ
+    document.querySelectorAll('.chk-sanpham').forEach(box => {
+        box.addEventListener('change', function() {
+            capNhatTongTien(); // Cập nhật lại tiền
+            
+            // Xử lý thông minh: Nếu tick hết các ô nhỏ, thì ô "Chọn tất cả" tự động sáng lên
+            let tongSoO = document.querySelectorAll('.chk-sanpham').length;
+            let soODaTick = document.querySelectorAll('.chk-sanpham:checked').length;
+            document.getElementById('checkAll').checked = (tongSoO === soODaTick);
+        });
+    });
+
+    // 3. XỬ LÝ NÚT "CHỌN TẤT CẢ" (Cái ô vuông trên cùng)
+    document.getElementById('checkAll').addEventListener('change', function() {
+        let trangThaiTick = this.checked; // Đang tick hay bỏ tick?
+        
+        // Bắt tất cả các ô nhỏ phải làm theo ô lớn
+        document.querySelectorAll('.chk-sanpham').forEach(box => {
+            box.checked = trangThaiTick;
+        });
+        
+        // Gọi hàm tính tiền lại
+        capNhatTongTien();
+    });
+
+    // 4. HÀM NÉM QUA TRANG THANH TOÁN (Cái cũ anh em mình làm)
+    function tienHanhThanhToan() {
+        let checkedBoxes = document.querySelectorAll('.chk-sanpham:checked');
+        if (checkedBoxes.length === 0) {
+            alert('Sếp chưa chọn món nào để thanh toán cả!');
+            return;
+        }
+        let ids = Array.from(checkedBoxes).map(cb => cb.value).join(',');
+        window.location.href = '/donhang/thanhtoan?ids=' + ids;
+    }
+
+    // 5. CHẠY MỘT LẦN LÚC MỚI VÀO TRANG ĐỂ RESET TIỀN VỀ 0đ
+    capNhatTongTien();
+</script>
+<!-- tiến  hành thanh toán -->
+ <script>
+function tienHanhThanhToan() {
+    // Tìm tất cả các ô checkbox đang được tick
+    let checkedBoxes = document.querySelectorAll('.chk-sanpham:checked');
+    
+    if (checkedBoxes.length === 0) {
+        alert('Sếp chưa chọn món nào để thanh toán cả!');
+        return;
+    }
+    
+    // Gom ID các món được chọn thành 1 chuỗi. Ví dụ ông chọn 2 món sẽ thành: "123,456"
+    let ids = Array.from(checkedBoxes).map(cb => cb.value).join(',');
+    
+    // Chuyển trang và ném cái chuỗi ID đó lên thanh địa chỉ
+    window.location.href = '/donhang/thanhtoan?ids=' + ids;
+}
+</script>

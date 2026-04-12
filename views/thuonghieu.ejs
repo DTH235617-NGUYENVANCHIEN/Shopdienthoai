@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <title><%= title %></title>
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .main-card { border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .table thead th { background-color: #f8f9fa; border-bottom: none; color: #333; font-weight: 600; padding: 15px; }
+        .btn-pill { border-radius: 50px; padding: 8px 20px; font-weight: 600; }
+        .badge-count { background-color: #ffc107; color: #212529; font-weight: bold; border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; vertical-align: middle; margin-left: 10px; }
+        .brand-logo { width: 50px; height: 50px; object-fit: contain; background: #fff; padding: 5px; }
+    </style>
+</head>
+<body>
+    <%- include('navbar') %>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold m-0">
+                <i class="bi bi-tags-fill text-danger me-2"></i>Quản Lý Thương Hiệu
+                <span class="badge-count"><%= thuonghieu.length %> hãng</span>
+            </h3>
+            <div>
+                <a href="/thuonghieu/them" class="btn btn-primary btn-pill shadow-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Thêm Thương Hiệu
+                </a>
+                <a href="/admin" class="btn btn-light btn-pill border ms-2">Quay lại</a>
+            </div>
+        </div>
+
+        <div class="card main-card overflow-hidden bg-white">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead>
+                        <tr>
+                            <th class="ps-4" width="10%">#</th>
+                            <th width="15%">Logo</th>
+                            <th class="text-start" width="25%">Tên thương hiệu</th>
+                            <th class="text-start" width="35%">Mô tả hãng</th>
+                            <th class="pe-4" width="15%">Thiết lập</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% var stt = 1; %>
+                        <% thuonghieu.forEach(th => { %>
+                            <tr>
+                                <td class="ps-4"><%= stt++ %></td>
+                                <td>
+                                    <img src="<%= th.HinhAnh || '/images/no-brand.png' %>" class="brand-logo rounded border shadow-sm">
+                                </td>
+                                <td class="text-start fw-bold text-dark"><%= th.TenThuongHieu %></td>
+                                <td class="text-start small text-muted text-truncate" style="max-width: 250px;">
+                                    <%= th.MoTa %>
+                                </td>
+                                <td class="pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="/thuonghieu/sua/<%= th._id %>" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
+                                            <i class="bi bi-pencil me-1"></i> Sửa
+                                        </a>
+                                        <a href="/thuonghieu/xoa/<%= th._id %>" class="btn btn-outline-danger btn-sm px-2 rounded-pill" onclick="return confirm('Xóa hãng <%= th.TenThuongHieu %> sẽ ảnh hưởng đến các điện thoại thuộc hãng này. Vẫn xóa?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+    <%- include('footer') %>
+    <%- include('javascript') %>
+</body>
+</html>

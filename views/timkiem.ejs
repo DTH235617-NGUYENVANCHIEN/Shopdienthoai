@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <title><%= title %></title>
+</head>
+<body class="bg-light">
+    <%- include('navbar') %>
+    <div class="container py-5">
+        <h3 class="fw-bold mb-4 border-bottom pb-2 text-primary">
+            <i class="bi bi-search me-2"></i><%= tukhoa %>
+        </h3>
+        <div class="row g-4">
+            <% dienthoai.forEach(dt => { %>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 rounded-4">
+                        <div class="p-3 text-center bg-white rounded-top-4" style="height: 200px;">
+                            <a href="/dienthoai/chitiet/<%= dt._id %>">
+                                <img src="<%= dt.HinhAnh.replace('/img/', '/images/') %>" class="img-fluid h-100" style="object-fit: contain;">
+                            </a>
+                        </div>
+                        <div class="card-body bg-white rounded-bottom-4">
+                            <h6 class="fw-bold"><%= dt.TenSP %></h6>
+                            <p class="text-danger fw-bold"><%= dt.DonGia.toLocaleString('vi-VN') %>đ</p>
+                            <a href="/dienthoai/chitiet/<%= dt._id %>" class="btn btn-sm btn-outline-primary w-100 rounded-pill">Chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    <%- include('footer') %>
+	<%- include('javascript') %>
+</body>
+</html>	
