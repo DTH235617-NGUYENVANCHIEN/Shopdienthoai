@@ -21,7 +21,72 @@
             <h2 class="fw-bold">Bảng Điều Khiển Quản Trị</h2>
             <p class="text-muted">Chọn một chức năng để bắt đầu quản lý</p>
         </div>
+        <div class="row g-4 mb-5">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-1 fw-bold opacity-75">TỔNG DOANH THU</p>
+                                <h3 class="mb-0 fw-bold"><%= tongDoanhThu.toLocaleString('vi-VN') %> đ</h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                                <i class="bi bi-wallet2 fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #dc3545 0%, #f87171 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-1 fw-bold opacity-75">ĐƠN CHỜ DUYỆT</p>
+                                <h3 class="mb-0 fw-bold"><%= donHangMoi %> <span class="fs-6 fw-normal">đơn</span></h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                                <i class="bi bi-bag-plus-fill fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #0d6efd 0%, #4facfe 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-1 fw-bold opacity-75">KHO HÀNG</p>
+                                <h3 class="mb-0 fw-bold"><%= tongSanPham %> <span class="fs-6 fw-normal">sản phẩm</span></h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                                <i class="bi bi-box-seam fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-1 fw-bold opacity-75">KHÁCH HÀNG</p>
+                                <h3 class="mb-0 fw-bold"><%= tongKhachHang %> <span class="fs-6 fw-normal">người</span></h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                                <i class="bi bi-people-fill fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
         <div class="row g-4 justify-content-center">
             
             <div class="col-sm-6 col-md-4 col-lg-3">

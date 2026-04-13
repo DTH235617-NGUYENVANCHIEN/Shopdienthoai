@@ -57,17 +57,35 @@
                                 </td>
                                 <td class="pe-4">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="/donhang/chitiet/<%= dh._id %>" class="btn btn-outline-secondary btn-sm rounded-pill px-3" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                                        <a href="/donhang/chitiet/<%= dh._id %>" class="btn btn-outline-secondary btn-sm rounded-pill px-3" title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
                                         
-                                        <% if(dh.TrangThai < 2) { %>
+                                        <% if (dh.TrangThai == 0) { %>
                                             <a href="/donhang/duyet/<%= dh._id %>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                                <i class="bi bi-check-lg"></i> Duyệt đơn
+                                                <i class="bi bi-check-lg"></i> Duyệt
                                             </a>
-                                        <% } %>
-                                        
-                                        <a href="/donhang/xoa/<%= dh._id %>" class="btn btn-outline-danger btn-sm rounded-pill px-2" onclick="return confirm('Hủy đơn hàng này?')"><i class="bi bi-trash"></i></a>
+                                            <a href="/donhang/admin-huy/<%= dh._id %>" class="btn btn-outline-warning btn-sm rounded-pill px-3" onclick="return confirm('Xác nhận hủy đơn hàng này?')">
+                                                <i class="bi bi-x-circle"></i> Hủy
+                                            </a>
+
+                                        <% } else if (dh.TrangThai == 1) { %>
+                                            <a href="/donhang/duyet/<%= dh._id %>" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                                <i class="bi bi-check-all"></i> Đã giao
+                                            </a>
+                                            <a href="/donhang/admin-huy/<%= dh._id %>" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Khách bom hàng? Xác nhận báo hủy đơn này?')">
+                                                <i class="bi bi-x-octagon"></i> Bom hàng
+                                            </a>
+
+                                        <% } else if (dh.TrangThai == -1) { %>
+                                            <a href="/donhang/xoa/<%= dh._id %>" class="btn btn-outline-danger btn-sm rounded-pill px-2" onclick="return confirm('Xóa vĩnh viễn hóa đơn này khỏi hệ thống?')">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            
+                                        <% } else if (dh.TrangThai == 2) { %>
+                                            <% } %>
                                     </div>
-                                </td>
+</td>
                             </tr>
                         <% }); %>
                     </tbody>

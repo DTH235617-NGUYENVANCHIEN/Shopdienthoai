@@ -25,17 +25,17 @@
                         
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold small">Họ và tên người nhận</label>
-                            <input type="text" class="form-control" name="HoTenNhan" value="<%= HoVaTen %>" required placeholder="Nhập tên người nhận">
+                            <input type="text" class="form-control" name="HoTenNhan" value="<%= user.HoVaTen %>" required placeholder="Nhập tên người nhận">
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold small">Số điện thoại liên hệ</label>
-                            <input type="text" class="form-control" name="DienThoaiNhan" required placeholder="Ví dụ: 0987654321" pattern="[0-9]{10}">
+                            <input type="text" class="form-control" name="DienThoaiNhan" value="<%= user.DienThoai || '' %>" required placeholder="Ví dụ: 0987654321" pattern="[0-9]{10}">
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label text-muted fw-bold small">Địa chỉ nhận hàng chi tiết</label>
-                            <textarea class="form-control" name="DiaChiNhan" rows="3" required placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện..."></textarea>
+                            <textarea class="form-control" name="DiaChiNhan" rows="3" required placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện..."><%= user.DiaChi || '' %></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -54,18 +54,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="card border mb-2">
-                            <div class="card-body py-2">
-                                <div class="form-check">
-                                    <input class="form-check-input fs-5" type="radio" name="PhuongThucThanhToan" id="bank" value="Chuyển khoản">
-                                    <label class="form-check-label ms-2 mt-1 fw-bold text-dark" for="bank">
-                                        🏦 Chuyển khoản ngân hàng (Quét mã QR)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="card border mb-2">
                             <div class="card-body py-2">
                                 <div class="form-check">

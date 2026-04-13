@@ -6,7 +6,8 @@ const taikhoanSchema = new mongoose.Schema({
     HinhAnh: { type: String },
     
     TenDangNhap: { type: String, required: true, unique: true }, 
-    
+    DienThoai: { type: String, default: '' },
+    DiaChi: { type: String, default: '' },
     MatKhau: { type: String, required: true },
     QuyenHan: { type: Number, default: 0 },
     KichHoat: { type: Number, default: 1 },

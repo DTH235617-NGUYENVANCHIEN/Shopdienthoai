@@ -94,5 +94,75 @@ const guiEmailDatHang = async (emailKhachHang, hoTenKhachHang, maDonHang, tongTi
     }
 };
 
-// Xuất cả 2 hàm ra để xài ở các Router khác
-module.exports = { guiEmailChaoMung, guiEmailDatHang };
+
+
+// =======================================================
+// 5. HÀM GỬI EMAIL THÔNG BÁO ĐÃ DUYỆT ĐƠN (ĐANG GIAO)
+// =======================================================
+const guiEmailDuyetDon = async (emailKhachHang, hoTenKhachHang, maDonHang) => {
+    try {
+        const subject = `🚚 Đơn hàng #${maDonHang} đang được giao tới bạn!`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; border: 1px solid #0d6efd; padding: 20px; border-radius: 10px;">
+                <h2 style="color: #0d6efd;">Tin vui đây ${hoTenKhachHang} ơi!</h2>
+                <p>Đơn hàng <b>#${maDonHang}</b> của bạn đã được Shop duyệt và bàn giao cho đơn vị vận chuyển.</p>
+                <p>Bạn vui lòng để ý điện thoại để shipper liên hệ giao hàng trong vòng 1-3 ngày tới nhé.</p>
+                <div style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #0d6efd;">
+                    <i>Trạng thái: <b>Đang giao hàng</b></i>
+                </div>
+                <hr>
+                <p>Cảm ơn bạn đã ủng hộ Shop Điện Thoại Chiến!</p>
+            </div>
+        `;
+        
+        const raw = createEncodedMail(emailKhachHang, subject, html);
+        await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: { raw: raw }
+        });
+        console.log('✅ [GMAIL API] ĐÃ GỬI MAIL DUYỆT ĐƠN CHO:', emailKhachHang);
+    } catch (error) {
+        console.log('❌ LỖI GỬI MAIL DUYỆT ĐƠN:', error);
+    }
+};
+
+// =======================================================
+// 6. HÀM THÔNG BÁO CHO ADMIN KHI CÓ ĐƠN MỚI
+// =======================================================
+const guiEmailThongBaoAdmin = async (maDonHang, tenKhach, tongTien) => {
+    try {
+        const domain = "https://shopdienthoai-dxvs.onrender.com"; // Link Render của sếp
+        const subject = `🔥 SẾP ƠI! CÓ ĐƠN HÀNG MỚI: #${maDonHang}`;
+        const html = `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; border: 2px dashed #ffc107; padding: 25px; border-radius: 15px; background-color: #fffdf5; max-width: 600px; margin: auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 50px;">🛍️</span>
+                </div>
+                <h2 style="color: #856404; text-align: center; margin-top: 0;">📢 THÔNG BÁO CÓ ĐƠN HÀNG MỚI!</h2>
+                <p style="font-size: 16px; line-height: 1.6;">Chào Admin Chiến, hệ thống vừa ghi nhận một đơn hàng mới từ khách hàng <b>${tenKhach}</b>.</p>
+                
+                <div style="background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <p style="margin: 5px 0;">🆔 Mã đơn hàng: <b style="color: #0d6efd;">#${maDonHang}</b></p>
+                    <p style="margin: 5px 0;">💰 Giá trị đơn: <b style="color: #dc3545;">${tongTien.toLocaleString('vi-VN')}đ</b></p>
+                </div>
+
+                <p style="text-align: center; margin-top: 25px;">
+                    <a href="${domain}/donhang" style="background-color: #ffc107; color: #000; padding: 15px 30px; text-decoration: none; font-weight: bold; border-radius: 10px; display: inline-block; font-size: 18px; border: 1px solid #e5ac00;">
+                        VÀO DUYỆT ĐƠN NGAY 🚀
+                    </a>
+                </p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="font-size: 12px; color: #999; text-align: center;">Đây là thông báo tự động từ hệ thống Shop Điện Thoại Chiến.</p>
+            </div>
+        `;
+
+        const raw = createEncodedMail('gamechienchoi@gmail.com', subject, html);
+        await gmail.users.messages.send({ userId: 'me', requestBody: { raw: raw } });
+        console.log('🚀 [GMAIL API] ĐÃ BÁO TIN CHO ADMIN!');
+    } catch (error) {
+        console.log('❌ LỖI BÁO TIN ADMIN:', error);
+    }
+};
+
+// NHỚ THÊM VÀO module.exports nha sếp
+module.exports = { guiEmailChaoMung, guiEmailDatHang, guiEmailDuyetDon, guiEmailThongBaoAdmin };

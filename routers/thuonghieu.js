@@ -102,13 +102,26 @@ router.post('/sua/:id', kiemTraAdmin, upload.single('HinhAnh'), async (req, res)
 });
 
 // GET: Xử lý xóa
-router.get('/xoa/:id', kiemTraAdmin, async (req, res) => {
+router.get('/xoa/:id', async (req, res) => {
     try {
-        await ThuongHieu.findByIdAndDelete(req.params.id);
-        req.session.success = 'Đã xóa thương hiệu!';
+        var id = req.params.id;
+
+        // 1. Kiểm tra xem có sản phẩm nào thuộc thương hiệu này không
+        var coSanPham = await DienThoai.findOne({ ThuongHieu: id });
+
+        if (coSanPham) {
+            // Nếu tìm thấy dù chỉ 1 máy, báo lỗi và không cho xóa
+            req.session.error = 'Không thể xóa! Vẫn còn sản phẩm thuộc thương hiệu này.';
+            return res.redirect('/thuonghieu');
+        }
+
+        // 2. Nếu không có máy nào thì mới tiến hành xóa
+        await ThuongHieu.findByIdAndDelete(id);
+        req.session.success = 'Đã xóa thương hiệu thành công!';
         res.redirect('/thuonghieu');
+
     } catch (error) {
-        console.log(error);
+        res.redirect('/error');
     }
 });
 

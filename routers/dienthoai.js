@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var DienThoai = require('../models/dienthoai');
 var ThuongHieu = require('../models/thuonghieu');
+var ChiTietDonHang = require('../models/chitietdonhang');
 var multer = require('multer');
 var fs = require('fs');
 
@@ -175,14 +176,53 @@ router.post('/sua/:id', kiemTraAdmin, upload.single('HinhAnh'), async (req, res)
 });
 
 // GET: /dienthoai/xoa/:id - Xóa sản phẩm
+// GET: Xóa sản phẩm (Có kiểm tra ràng buộc dữ liệu)
 router.get('/xoa/:id', kiemTraAdmin, async (req, res) => {
     try {
-        await DienThoai.findByIdAndDelete(req.params.id);
-        req.session.success = 'Đã xóa sản phẩm khỏi hệ thống!';
-        res.redirect('/dienthoai');
+        var idSP = req.params.id;
+
+        // 1. KIỂM TRA RÀNG BUỘC: Xem có đơn hàng nào từng chứa máy này không?
+        // (Chỉ cần tìm thấy 1 dòng trong ChiTietDonHang là đủ để chặn)
+        var spTrongDonHang = await ChiTietDonHang.findOne({ DienThoai: idSP });
+
+        if (spTrongDonHang) {
+            // CẢNH BÁO ĐỎ: Trả về thông báo lỗi, bắt buộc dùng nút "Ngừng kinh doanh"
+            req.session.error = ' Không thể xóa! Sản phẩm này đã có giao dịch. Vui lòng chuyển sang trạng thái "Ngừng kinh doanh".';
+            return res.redirect('/dienthoai');
+        }
+
+        // 2. NẾU AN TOÀN (Chưa ai mua bao giờ): Tiến hành xóa vĩnh viễn
+        await DienThoai.findByIdAndDelete(idSP);
+        
+        req.session.success = 'Đã xóa sản phẩm thành công!';
+        res.redirect('/dienthoai'); // Load lại trang danh sách
+
     } catch (error) {
-        res.send('Lỗi khi xóa!');
+        console.log("Lỗi khi xóa sản phẩm:", error);
+        res.redirect('/error');
     }
 });
+// GET: Đổi trạng thái sản phẩm (Đang bán <-> Ngừng kinh doanh)
+router.get('/doitrangthai/:id', kiemTraAdmin, async (req, res) => {
+    try {
+        var id = req.params.id;
+        
+        // 1. Tìm cái máy đó trong DB
+        var dt = await DienThoai.findById(id);
 
+        // 2. Đảo ngược trạng thái: Nếu đang 1 (bán) thì thành 0 (ngừng) và ngược lại
+        var trangThaiMoi = (dt.TrangThai == 1) ? 0 : 1;
+
+        // 3. Cập nhật vào Database
+        await DienThoai.findByIdAndUpdate(id, { TrangThai: trangThaiMoi });
+
+        // 4. Báo tin vui và quay lại trang danh sách
+        req.session.success = 'Đã cập nhật trạng thái sản phẩm!';
+        res.redirect('/dienthoai'); // Hoặc res.redirect(req.get('Referrer')) để đứng yên tại chỗ
+        
+    } catch (error) {
+        console.log(error);
+        res.redirect('/error');
+    }
+});
 module.exports = router;

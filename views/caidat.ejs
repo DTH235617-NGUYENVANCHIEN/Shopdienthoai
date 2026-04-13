@@ -68,19 +68,31 @@
                                             </div>
                                         </div>
                                         <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold">Họ và tên</label>
-                                                <input type="text" class="form-control" name="HoVaTen" value="<%= taikhoan.HoVaTen %>" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold">Email</label>
-                                                <input type="email" class="form-control" name="Email" value="<%= taikhoan.Email %>">
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label small fw-bold">Tên đăng nhập</label>
-                                                <input type="text" class="form-control bg-light" value="<%= taikhoan.TenDangNhap %>" disabled>
-                                            </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Họ và tên</label>
+                                            <input type="text" class="form-control" name="HoVaTen" value="<%= taikhoan.HoVaTen %>" required>
                                         </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Tên đăng nhập</label>
+                                            <input type="text" class="form-control bg-light" value="<%= taikhoan.TenDangNhap %>" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Số điện thoại</label>
+                                            <input type="text" class="form-control" name="DienThoai" value="<%= taikhoan.DienThoai || '' %>" placeholder="Chưa cập nhật">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Email</label>
+                                            <input type="email" class="form-control" name="Email" value="<%= taikhoan.Email %>" required placeholder="Nhập email của bạn">
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <label class="form-label small fw-bold">Địa chỉ giao hàng mặc định</label>
+                                            <textarea class="form-control" name="DiaChi" rows="2" placeholder="Nhập địa chỉ chi tiết của bạn..."><%= taikhoan.DiaChi || '' %></textarea>
+                                        </div>
+                                    </div>
                                         <button type="submit" class="btn btn-primary fw-bold px-4 py-2 mt-4 shadow-sm">LƯU THAY ĐỔI</button>
                                     </form>
                                 </div>

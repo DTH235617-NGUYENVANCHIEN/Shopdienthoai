@@ -116,7 +116,9 @@ router.post('/caidat/capnhat', kiemTraDangNhap, upload.single('HinhAnh'), async 
     try {
         var dataUpdate = {
             HoVaTen: req.body.HoVaTen,
-            Email: req.body.Email
+            Email: req.body.Email,
+            DienThoai: req.body.DienThoai,
+            DiaChi: req.body.DiaChi
         };
 
         // Nếu người dùng có chọn ảnh mới thì cập nhật link ảnh mới
