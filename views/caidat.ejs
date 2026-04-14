@@ -128,14 +128,5 @@
 
     <%- include('javascript') %>
     
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var hash = window.location.hash;
-            if (hash) {
-                var triggerEl = document.querySelector('button[data-bs-target="' + hash + '"]');
-                if (triggerEl) bootstrap.Tab.getInstance(triggerEl).show();
-            }
-        });
-    </script>
 </body>
 </html>

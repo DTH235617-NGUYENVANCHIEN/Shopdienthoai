@@ -1,7 +1,5 @@
 const { google } = require('googleapis');
-// =======================================================
-// 1. THÔNG TIN CHÌA KHÓA GOOGLE CLOUD
-// =======================================================
+// THÔNG TIN CHÌA KHÓA GOOGLE CLOUD
 const CLIENT_ID = '532299171106-fihkkls0mek65566vp6igvu7kmsbobvp.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
 const REFRESH_TOKEN = '1//04y1E_7pqDpJtCgYIARAAGAQSNwF-L9Ir7XFoq5_1qq9MBxBkicHzeUUCrVgnfQ0s2ddg9JCf85DxLyCpwVTVFw5bL7R0IK-GEoA';
@@ -12,12 +10,8 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
-// =======================================================
-// 2. HÀM MÃ HÓA EMAIL (Bắt buộc của Gmail API)
-// =======================================================
-// =======================================================
-// 2. HÀM MÃ HÓA EMAIL (Đã fix lỗi font chữ người gửi)
-// =======================================================
+
+// HÀM MÃ HÓA EMAIL 
 const createEncodedMail = (to, subject, htmlContent) => {
     // Đóng gói tên Shop theo đúng chuẩn chống lỗi font của Gmail
     const tenShop = "Shop Điện Thoại Chiến 📱";
@@ -34,9 +28,7 @@ const createEncodedMail = (to, subject, htmlContent) => {
     
     return Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
-// =======================================================
-// 3. HÀM GỬI EMAIL CHÀO MỪNG (Khi đăng ký tài khoản)
-// =======================================================
+//HÀM GỬI EMAIL CHÀO MỪNG (Khi đăng ký tài khoản)
 const guiEmailChaoMung = async (emailKhachHang, hoTenKhachHang) => {
     try {
         const subject = '   🎉 Chào mừng bạn gia nhập ShopDienThoai!';
@@ -58,15 +50,12 @@ const guiEmailChaoMung = async (emailKhachHang, hoTenKhachHang) => {
             requestBody: { raw: raw }
         });
 
-        console.log('✅ [GMAIL API] ĐÃ GỬI MAIL CHÀO MỪNG TỚI:', emailKhachHang);
+        console.log('[GMAIL API] ĐÃ GỬI MAIL CHÀO MỪNG TỚI:', emailKhachHang);
     } catch (error) {
-        console.log('❌ LỖI GỬI EMAIL CHÀO MỪNG:', error);
+        console.log('[GMAIL API] LỖI GỬI EMAIL CHÀO MỪNG:', error);
     }
 };
-
-// =======================================================
-// 4. HÀM GỬI EMAIL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG
-// =======================================================
+// HÀM GỬI EMAIL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG
 const guiEmailDatHang = async (emailKhachHang, hoTenKhachHang, maDonHang, tongTien) => {
     try {
         const subject = `📦 Đặt hàng thành công - Mã đơn: #${maDonHang}`;
@@ -94,11 +83,7 @@ const guiEmailDatHang = async (emailKhachHang, hoTenKhachHang, maDonHang, tongTi
     }
 };
 
-
-
-// =======================================================
-// 5. HÀM GỬI EMAIL THÔNG BÁO ĐÃ DUYỆT ĐƠN (ĐANG GIAO)
-// =======================================================
+// HÀM GỬI EMAIL THÔNG BÁO ĐÃ DUYỆT ĐƠN (ĐANG GIAO)
 const guiEmailDuyetDon = async (emailKhachHang, hoTenKhachHang, maDonHang) => {
     try {
         const subject = `🚚 Đơn hàng #${maDonHang} đang được giao tới bạn!`;
@@ -125,10 +110,7 @@ const guiEmailDuyetDon = async (emailKhachHang, hoTenKhachHang, maDonHang) => {
         console.log('❌ LỖI GỬI MAIL DUYỆT ĐƠN:', error);
     }
 };
-
-// =======================================================
-// 6. HÀM THÔNG BÁO CHO ADMIN KHI CÓ ĐƠN MỚI
-// =======================================================
+// HÀM THÔNG BÁO CHO ADMIN KHI CÓ ĐƠN MỚI
 const guiEmailThongBaoAdmin = async (maDonHang, tenKhach, tongTien) => {
     try {
         const domain = "https://shopdienthoai-dxvs.onrender.com"; // Link Render của sếp

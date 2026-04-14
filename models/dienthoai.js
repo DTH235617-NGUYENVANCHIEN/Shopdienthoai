@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const dienThoaiSchema = new mongoose.Schema({
     TenSP: { type: String, required: true },
-    ThuongHieu: { type: mongoose.Schema.Types.ObjectId, ref: 'ThuongHieu' }, // Liên kết tới bảng Thương Hiệu
+    ThuongHieu: { type: mongoose.Schema.Types.ObjectId, ref: 'ThuongHieu' }, 
     DonGia: { type: Number, required: true },
     SoLuong: { type: Number, default: 10 },
     HinhAnh: { type: String },
@@ -12,7 +12,7 @@ const dienThoaiSchema = new mongoose.Schema({
     Ram: { type: String },
     Rom: { type: String },
     Pin: { type: String },
-    TrangThai: { type: Number, default: 1 } // 1: Đang bán, 0: Ngừng kinh doanh
+    TrangThai: { type: Number, default: 1 } 
 });
 
 module.exports = mongoose.model('DienThoai', dienThoaiSchema);

@@ -141,23 +141,5 @@
     
     <%- include('javascript') %>
 
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('passwordInput');
-            const toggleIcon = document.getElementById('toggleIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bi-eye-slash');
-                toggleIcon.classList.add('bi-eye');
-                toggleIcon.classList.replace('text-muted', 'text-primary'); // Chuyển màu con mắt sang xanh
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bi-eye');
-                toggleIcon.classList.add('bi-eye-slash');
-                toggleIcon.classList.replace('text-primary', 'text-muted'); // Chuyển màu con mắt về xám
-            }
-        }
-    </script>
 </body>
 </html>

@@ -92,7 +92,6 @@ router.post('/dangnhap', async (req, res) => {
             res.redirect('/admin'); 
         } else {
             // Nếu là KHÁCH: Bay về trang chủ bán hàng
-            // THÊM ĐÚNG 1 DÒNG NÀY ĐỂ PHỤC HỒI GIỎ HÀNG
             req.session.giohang = taikhoan.GioHang || [];
             res.redirect('/');
         }
@@ -121,7 +120,7 @@ router.post('/caidat/capnhat', kiemTraDangNhap, upload.single('HinhAnh'), async 
             DiaChi: req.body.DiaChi
         };
 
-        // Nếu người dùng có chọn ảnh mới thì cập nhật link ảnh mới
+        // Nếu người dùng có chọn ảnh mới thì cập nhật link ảnh mới không thì giữ nguyên cái cũ
         if (req.file) {
             dataUpdate.HinhAnh = '/images/users/' + req.file.filename;
         }
@@ -156,7 +155,7 @@ router.post('/caidat/doimatkhau', kiemTraDangNhap, async (req, res) => {
             MatKhau: bcrypt.hashSync(req.body.MatKhauMoi, salt) 
         });
         req.session.success = 'Đã đổi mật khẩu thành công!';
-        res.redirect('/caidat');
+        res.redirect('/dangnhap');
     } catch (err) { res.redirect('/caidat'); }
 });
 

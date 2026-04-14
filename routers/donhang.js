@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var DonHang = require('../models/donhang');
+var ThuongHieu = require('../models/thuonghieu');
 var ChiTietDonHang = require('../models/chitietdonhang');
 var DienThoai = require('../models/dienthoai');
 const TaiKhoan = require('../models/taikhoan'); 
@@ -23,11 +24,8 @@ const kiemTraAdmin = (req, res, next) => {
     }
     next();
 };
-
-// =======================================================
-// 1. DÀNH CHO KHÁCH HÀNG
-// =======================================================
-// 1. THÊM SẢN PHẨM VÀO GIỎ HÀNG
+//  dành cho khách hàng
+//  thêm sản phẩm vào giỏ
 router.get('/them/:id', async (req, res) => {
     try {
         var idSP = req.params.id;
@@ -45,7 +43,7 @@ router.get('/them/:id', async (req, res) => {
         var giohang = req.session.giohang;
         var viTri = giohang.findIndex(item => item.idSP == idSP);
 
-        if (viTri >= 0) {
+        if (viTri >= 0) {    
             // Đã có rồi thì tăng số lượng lên 1
             giohang[viTri].SoLuong += 1;
             giohang[viTri].ThanhTien = giohang[viTri].SoLuong * giohang[viTri].DonGia;
@@ -64,7 +62,7 @@ router.get('/them/:id', async (req, res) => {
         // Báo thông báo màu xanh lá là đã thêm thành công
         req.session.success = 'Đã thêm ' + sp.TenSP + ' vào giỏ!';
         
-        // Trở lại đúng cái trang mà khách vừa đứng (Giống hệt cách ông làm bên Admin)
+        // Trở lại đúng cái trang mà khách vừa đứng 
         res.redirect(req.get('Referrer') || '/');
 
     } catch (error) {
@@ -100,9 +98,9 @@ router.get('/them-ajax/:id', async (req, res) => {
         let newTotal = 0;
         // Nếu ông đếm theo DÒNG:
         newTotal = giohang.length; 
-        // Nếu ông đếm theo TỔNG SẢN PHẨM thì dùng vòng lặp cộng dồn như cũ nhé.
+        
 
-        // TRẢ VỀ JSON (Đây là chìa khóa để không load trang)
+        // trả về cái json để không load trang
         res.json({
             success: true,
             newTotal: newTotal
@@ -112,7 +110,7 @@ router.get('/them-ajax/:id', async (req, res) => {
         res.json({ success: false });
     }
 });
-// 2. XEM GIỎ HÀNG
+// xem giỏ hàng
 router.get('/giohang', kiemTraDangNhap,(req, res) => {
     // Lấy giỏ hàng từ session ra, nếu không có thì gán là mảng rỗng
     var giohang = req.session.giohang || [];
@@ -129,7 +127,7 @@ router.get('/giohang', kiemTraDangNhap,(req, res) => {
         tongTien: tongTien
     });
 });
-// GET: Danh sách đơn hàng CỦA TÔI (Giống 'baiviet/cuatoi' của thầy)
+// GET: Danh sách đơn hàng của tôi
 router.get('/cuatoi', kiemTraDangNhap, async (req, res) => {
     // Lấy Mã người dùng đang đăng nhập
     var id = req.session.MaNguoiDung;
@@ -142,6 +140,15 @@ router.get('/cuatoi', kiemTraDangNhap, async (req, res) => {
         donhang: dh
     });
 });
+// GET: Xóa hẳn 1 món khỏi giỏ hàng
+router.get('/xoa-mon/:id', (req, res) => {
+    var idSP = req.params.id;
+    var giohang = req.session.giohang || [];
+    
+    req.session.giohang = giohang.filter(item => item.idSP != idSP);
+    req.session.success = 'Đã xóa sản phẩm khỏi giỏ hàng!';
+    res.redirect('/donhang/giohang');
+});
 
 // GET: Xem chi tiết 1 đơn hàng cụ thể
 router.get('/chitiet/:id', kiemTraDangNhap, async (req, res) => {
@@ -152,7 +159,7 @@ router.get('/chitiet/:id', kiemTraDangNhap, async (req, res) => {
     res.render('donhang_chitiet', {
         title: 'Chi tiết đơn hàng',
         donhang: dh,
-        chitietdonhang: chitiet
+        chitietdonhang: chitiet 
     });
 });
 // GET: Khách hàng tự hủy đơn
@@ -161,7 +168,7 @@ router.get('/huy/:id', kiemTraDangNhap, async (req, res) => {
         var id = req.params.id;
         var dh = await DonHang.findById(id);
 
-        // Kiểm tra bảo mật lần 2 dưới Backend (Chống hacker dùng Postman chọc vào)
+        // láy giờ hiện tại trừ đi giờ tạo hóa đơn rồi đổi ra phút và làm tròn bằng Math.floor
         let soPhutDaQua = Math.floor((new Date() - new Date(dh.NgayLap)) / (1000 * 60));
         
         // Khách chỉ được hủy đơn CỦA MÌNH, đang Chờ duyệt, và dưới 30 phút
@@ -179,33 +186,38 @@ router.get('/huy/:id', kiemTraDangNhap, async (req, res) => {
         res.redirect('/error');
     }
 });
+// Dành cho ADMIN: Quản lý toàn bộ đơn hàng
+router.get('/', async (req, res) => {
+    try {
+        // 1. Trạm gác Admin
+        if (!req.session.MaNguoiDung || req.session.QuyenHan != 1) {
+            req.session.error = "Bạn không có quyền truy cập!";
+            return res.redirect('/');
+        }
 
-// =======================================================
-// 2. DÀNH CHO ADMIN
-// =======================================================
+        // 2. Lấy dữ liệu 
+        var dsThuongHieu = await ThuongHieu.find().exec();
+        var dsDonHang = await DonHang.find().sort({ NgayLap: -1 }).exec();
 
-// GET: Danh sách TẤT CẢ đơn hàng (Giống 'baiviet/' của thầy)
-router.get('/', kiemTraAdmin, async (req, res) => {
-    var dh = await DonHang.find().populate('KhachHang').sort({ NgayLap: -1 }).exec();
-    
-    res.render('donhang', {
-        title: 'Quản lý đơn hàng',
-        donhang: dh
-    });
+        // 3. Render ra giao diện
+        res.render('donhang', {
+            title: 'Quản lý đơn hàng của hệ thống',
+            thuonghieu: dsThuongHieu, 
+            donhang: dsDonHang       
+        });
+
+    } catch (error) {
+        console.log("Lỗi:", error);
+        res.redirect('/error');
+    }
 });
-
-// GET: Duyệt đơn hàng / Cập nhật trạng thái (Giống 'baiviet/duyet/:id' của thầy)
-// GET: Duyệt đơn hàng
 // GET: Duyệt đơn hàng
 router.get('/duyet/:id', kiemTraAdmin, async (req, res) => {
     try {
         var id = req.params.id;
-        
         // 1. PHẢI CÓ .populate('KhachHang') thì mới lấy được Email để gửi
         var dh = await DonHang.findById(id).populate('KhachHang');
-        
         if (!dh) return res.redirect('/donhang');
-
         // 2. LOGIC TRỪ KHO: Nên trừ khi Duyệt đơn (Từ Chờ xác nhận 0 -> Đang giao 1)
         if (dh.TrangThai == 0) { 
             // Tìm tất cả các món trong đơn hàng này 
@@ -218,14 +230,13 @@ router.get('/duyet/:id', kiemTraAdmin, async (req, res) => {
                 });
             }
         }
-
         // 3. Cập nhật trạng thái đơn hàng
         // Nếu là 0 (Chờ duyệt) -> lên 1 (Đang giao)
         // Nếu là 1 (Đang giao) -> lên 2 (Đã giao)
         var trangThaiMoi = (dh.TrangThai == 0) ? 1 : 2;
         await DonHang.findByIdAndUpdate(id, { 'TrangThai': trangThaiMoi });
         
-        // 4. GỬI EMAIL THÔNG BÁO (Chỉ gửi khi chuyển sang Đang giao)
+        // 4. Gửi email Chỉ gửi khi chuyển sang Đang giao
         if (trangThaiMoi == 1 && dh.KhachHang && dh.KhachHang.Email) {
             let maDonNgan = dh._id.toString().slice(-6).toUpperCase();
             // Gọi hàm gửi mail báo hàng đang đi
@@ -304,17 +315,8 @@ router.get('/giam/:id', (req, res) => {
     res.redirect('/donhang/giohang');
 });
 
-// GET: Xóa hẳn 1 món khỏi giỏ hàng
-router.get('/xoa-mon/:id', (req, res) => {
-    var idSP = req.params.id;
-    var giohang = req.session.giohang || [];
-    
-    req.session.giohang = giohang.filter(item => item.idSP != idSP);
-    req.session.success = 'Đã xóa sản phẩm khỏi giỏ hàng!';
-    res.redirect('/donhang/giohang');
-});
 
-// CHUC NANG NAY DE GUI EMAIL THONG BAO DAT HANG THANH CONG SE DUOC VIET TRONG utils/mailer.js, SAU DO GOI HAM DO TAI DAY KHI KHACH HANG CHOT DON THANH CONG. O DAY TOI GIUP ONG GOI HAM guiEmailDatHang() NEU KHACH HANG CO EMAIL TRONG DATABASE, VA TRUYEN CAC THAM SO CAN THIET DE GUI MAIL. ONG CHI CAN COPY ĐOẠN CODE DƯỚI VÀ DÁN VÀO SAU KHI LƯU ĐƠN HÀNG THÀNH CÔNG TRONG ROUTER POST '/xacnhan' Ở PHẦN 2 DÀNH CHO KHÁCH HÀNG Ở TRÊN.
+
 // GET: Hiển thị trang thanh toán
 router.get('/thanhtoan', kiemTraDangNhap, async (req, res) => {
     try {
@@ -325,10 +327,10 @@ router.get('/thanhtoan', kiemTraDangNhap, async (req, res) => {
             return res.redirect('/');
         }
 
-        // 1. Lấy danh sách ID khách vừa tick từ trên URL xuống
+        //  Lấy danh sách ID khách vừa tick từ trên URL xuống
         let dsIdDuocChon = req.query.ids ? req.query.ids.split(',') : [];
 
-        // 2. LỌC GIỎ HÀNG: Chỉ lấy những món khách có tick
+        //  LỌC GIỎ HÀNG: Chỉ lấy những món khách có tick
         let giohangDuocChon = giohang.filter(sp => dsIdDuocChon.includes(sp.idSP.toString()));
 
         if (giohangDuocChon.length === 0) {
@@ -336,17 +338,16 @@ router.get('/thanhtoan', kiemTraDangNhap, async (req, res) => {
             return res.redirect('/giohang');
         }
         
-        // 3. Tính tổng tiền (chỉ tính cho những món đã chọn)
+        //  Tính tổng tiền (chỉ tính cho những món đã chọn)
         let tongTien = 0;
         giohangDuocChon.forEach(sp => tongTien += sp.ThanhTien);
 
-        // 4. BÍ KÍP: Lưu mấy món đã lọc này vào một cái "giỏ nháp" để lát chốt đơn xài
+        //  Lưu mấy món đã lọc này vào một cái "giỏ nháp" để lát chốt đơn xài
         req.session.giohang_tam = giohangDuocChon;
 
-        // --- KHÚC NÀY MỚI NÈ SẾP ---
-        // 5. Lấy thông tin user từ DB để lấy SĐT và Địa chỉ
+        //  Lấy thông tin user từ DB để lấy SĐT và Địa chỉ
         const user = await TaiKhoan.findById(req.session.MaNguoiDung);
-        // ---------------------------
+
 
         res.render('thanhtoan', { 
             title: 'Thanh toán đơn hàng', 
@@ -411,8 +412,8 @@ router.post('/xacnhan', kiemTraDangNhap, async (req, res) => {
         
        // luu lại thông tin địa chỉ và điện thoại mới cập nhật của khách vào tài khoản để lần sau khỏi phải nhập
         await TaiKhoan.findByIdAndUpdate(req.session.MaNguoiDung, {
-             GioHang: req.session.giohang,
-             DienThoai: req.body.DienThoaiNhan,   
+            GioHang: req.session.giohang,
+            DienThoai: req.body.DienThoaiNhan,   
             DiaChi: req.body.DiaChiNhan
         });
         req.session.giohang_tam = null; 

@@ -32,27 +32,8 @@ const kiemTraAdmin = (req, res, next) => {
     next();
 };
 
-// ==========================================================
 // PHẦN 1: DÀNH CHO KHÁCH HÀNG (Dùng dienthoai_list.ejs)
-// ==========================================================
 
-// GET: /dienthoai/list - Danh sách sản phẩm cho khách
-router.get('/list', async (req, res) => {
-    try {
-        // Lọc 2 điều kiện: Đang cho phép bán (TrangThai = 1) VÀ còn hàng (SoLuong > 0)
-        var ds = await DienThoai.find({ 
-            TrangThai: 1, 
-            SoLuong: { $gt: 0 } 
-        }).populate('ThuongHieu');
-
-        res.render('dienthoai_list', { 
-            title: 'Cửa hàng Điện Thoại', 
-            dienthoai: ds 
-        });
-    } catch (error) {
-        res.send('Lỗi lấy dữ liệu sản phẩm!');
-    }
-});
 
 // GET: /dienthoai/chitiet/:id - Xem chi tiết
 router.get('/chitiet/:id', async (req, res) => {
@@ -70,13 +51,11 @@ router.get('/chitiet/:id', async (req, res) => {
             
         });
     } catch (error) {
-        res.redirect('/dienthoai/list');
+        res.redirect('/');
     }
 });
 
-// ==========================================================
 // PHẦN 2: DÀNH CHO ADMIN (Dùng dienthoai.ejs làm trang quản lý)
-// ==========================================================
 
 // GET: /dienthoai/ - Trang chủ quản lý (Table)
 router.get('/', kiemTraAdmin, async (req, res) => {

@@ -75,7 +75,7 @@
                  <!-- phân quyền giỏ hàng và đơn hàng -->
                 <li class="nav-item me-2">
                     <% if (session && session.QuyenHan == 1) { %>
-                        <a class="nav-link fw-bold text-info position-relative" href="/admin/donhang">
+                        <a class="nav-link fw-bold text-info position-relative" href="/donhang">
                             <i class="bi bi-cart-check fs-5"></i> Đơn hàng
                             <% if (typeof soDonHangChoDuyet !== 'undefined' && soDonHangChoDuyet > 0) { %>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
