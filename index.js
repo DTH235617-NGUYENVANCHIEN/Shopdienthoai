@@ -89,13 +89,13 @@ app.use(function(req, res, next) {
 });
 
 // 6. GẮN ĐƯỜNG DẪN CHO WEB
-app.use('/', indexRouter);
-app.use('/', authRouter);
+
 app.use('/taikhoan', taikhoanRouter);
 app.use('/dienthoai', dienthoaiRouter); 
 app.use('/thuonghieu', thuonghieuRouter); // BỔ SUNG DÒNG NÀY VÀO ĐÂY
 app.use('/donhang', donhangRouter);     
-
+app.use('/', indexRouter);
+app.use('/', authRouter);
 // 7. KHỞI ĐỘNG SERVER
 app.listen(3030, () => {
     console.log('Server is running at http://127.0.0.1:3030');

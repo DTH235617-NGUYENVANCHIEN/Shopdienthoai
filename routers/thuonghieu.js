@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var ThuongHieu = require('../models/thuonghieu');
+var DienThoai = require('../models/dienthoai'); 
 var multer = require('multer');
 var fs = require('fs');
 
